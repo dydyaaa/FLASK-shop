@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Bob shop
+{% endblock %}
+
+{% block content %}
+
+<main>
+    <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+        <h1 class="display-4 fw-normal text-body-emphasis">Наши товары</h1>
+        <p class="fs-5 text-body-secondary">Выберите товар</p>
+    </div>
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        {% for el in data %}
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-sm">
+                <div class="card-header py-3">
+                    <h4 class="my-0 fw-normal">{{ el.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title">${{ el.price }}</h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>{{ el.description }}</li>
+                        <li>{{ el.category }}</li>
+                        <li>{{ el.isActive }}</li>
+                        <li><img src="../media/{{ el.image_path }}" alt="" width="200px" height="200px"></li>
+                    </ul>
+                    <a href="/buy/{{ el.title }}"><button type="button" class="w-100 btn btn-lg btn-outline-primary">Купить</button></a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</main>
+{% endblock %}

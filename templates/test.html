@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phone Number Input Mask</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.6/jquery.inputmask.min.js"></script>
+</head>
+<body>
+
+<form action="#">
+  <label for="phone">Phone Number:</label>
+  <input type="text" id="phone" name="phone">
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+$(document).ready(function() {
+  $('#phone').inputmask('+7 (999) 999 99 99', {
+    placeholder: '+7 (___) ___ __ __',
+    clearIncomplete: true,
+    showMaskOnHover: false
+  });
+});
+</script>
+
+</body>
+</html>

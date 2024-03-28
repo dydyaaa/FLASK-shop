@@ -5,6 +5,7 @@ Bob about
 {% endblock %}
 
 {% block content %}
+<div class="container">
 <h1>Новый товар</h1>
     <form action="/upload" method="POST" enctype="multipart/form-data">
         
@@ -22,4 +23,5 @@ Bob about
         
         <input class="btn btn-success" type="submit" value="Upload">
     </form>
+</div>
 {% endblock %}

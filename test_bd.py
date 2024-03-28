@@ -1,19 +1,19 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_uploads import UploadSet, IMAGES, configure_uploads
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 
 
 main_file_path = os.path.abspath(__file__)
 directory_path = os.path.dirname(main_file_path)
-database_file_path = os.path.join(directory_path, 'shop_test.db')
+database_file_path = os.path.join(directory_path, 'shop_test2.db')
 
 
 images = UploadSet('images', IMAGES)
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_file_path}'
-app.config['UPLOADED_IMAGES_DEST'] = 'media'
+app.config['UPLOADED_IMAGES_DEST'] = 'static/media'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 configure_uploads(app, images)
@@ -31,30 +31,24 @@ class Item(db.Model):
     def __repr__(self):
         return self.title
 
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    client_number = db.Column(db.String, nullable=False)
+    client_name = db.Column(db.String, nullable=False)
+    product_title = db.Column(db.Integer, nullable=False)
+    order_status = db.Column(db.String, nullable=False, default='Не обработан')
+    paymen_status = db.Column(db.String, nullable=False, default='Не оплачен')
+    date = db.Column(db.DateTime, nullable=False, default=datetime.now)
+
+    def __repr__(self):
+        return self.product_title
     
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String, nullable=False)
-#     email = db.Column(db.String, nullable=False)
-#     user_status = db.Column(db.String, nullable=False, default='User')
-
-#     def __repr__(self):
-#         return self.name
-
-# class Order(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     client_number = db.Column(db.String, nullable-False)
-#     product_title = db.Column(db.Integer, nullable=False)
-#     order_status = db.Column(db.String, nullable=False, default='Не обработан')
-#     paymen_status = db.Column(db.String, nullable=False, default='Не оплачен')
-#     date = db.Column()
-
-#     def __repr__(self):
-#         return f'Заказ №{self.id} : {self.product_id}'
+with app.app_context():
+    db.create_all()
 
 def generate_filename(filename):
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  # Текущая дата и время
-    file_extension = os.path.splitext(filename)[1]  # Расширение файла
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")  
+    file_extension = os.path.splitext(filename)[1]  
     return timestamp + file_extension
 
 @app.route('/')
@@ -62,30 +56,19 @@ def index():
     items = Item.query.order_by(Item.category).all()
     return render_template('index.html', data=items)
 
+@app.route('/create')
+def create():
+    items = Item.query.order_by(Item.category).all()
+    return render_template('create.html', data=items)
+
 @app.route('/orders')
 def orders():
-    return render_template('orders.html')
+    orders = Order.query.order_by(Order.date).all()
+    return render_template('orders.html', data=orders)
 
 @app.route('/about')
 def about():
     return render_template('about.html')
-
-@app.route('/create', methods = ['POST', 'GET'])
-def create():
-    if request.method == "POST":
-        title = request.form['title']
-        price = request.form['price']
-        item = Item(title=title, price=price)
-
-        try:
-            db.session.add(item)
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'Error'
-
-    else:     
-        return render_template('create.html')
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
@@ -109,9 +92,50 @@ def upload():
     else:
         return render_template('upload.html')
     
-@app.route('/buy/<string:title>')
+@app.route('/order_accepted/<int:order_id>')
+def order_accepted(order_id):
+    return render_template('OK_order.html', id=order_id)
+
+@app.route('/delete/<int:id>', methods=['POST'])
+def delete_record(id):
+    record = Item.query.get_or_404(id)
+    db.session.delete(record)
+    db.session.commit()
+    return redirect(url_for('create'))
+
+@app.route('/update_order_status/<int:order_id>', methods=['POST'])
+def update_order_status(order_id):
+    order = Order.query.get_or_404(order_id)
+    new_status = request.form['status']
+    order.order_status = new_status
+    db.session.commit()
+    return redirect(url_for('orders'))
+
+@app.route('/update_paymen_status/<int:order_id>', methods=['POST'])
+def update_paymen_status(order_id):
+    order = Order.query.get_or_404(order_id)
+    new_status = request.form['status']
+    order.paymen_status = new_status
+    db.session.commit()
+    return redirect(url_for('orders'))
+
+@app.route('/buy/<string:title>', methods=['GET', 'POST'])
 def buy(title):
-    return render_template('make_order.html', title=title)
+    if request.method == 'POST':
+        order = Order(
+            client_number=request.form['client_phone'],
+            client_name=request.form['client_name'],
+            product_title=title
+        )
+        try:
+            db.session.add(order)
+            db.session.commit()
+            last_order = Order.query.order_by(Order.id.desc()).first()
+            return redirect(url_for('order_accepted', order_id=last_order.id))
+        except:
+            return 'Error'
+    else:
+        return render_template('make_order.html', title=title)
 
 if __name__ == "__main__":
     app.run(debug=True)

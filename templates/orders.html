@@ -5,35 +5,88 @@ Bob orders
 {% endblock %}
 
 {% block content %}
-<h1>Ваши заказы</h1>
+<h1>Активные заказы</h1>
 
     <div class="album py-5 bg-light">
         <div class="container">
-
           <div class="row">
+            {% for el in data %}
+            {% if el.order_status not in ["Завершен", "Отменен"] %}
             <div class="col-md-4">
               <div class="card mb-4 box-shadow">
                 <div class="card-body">
-                <h3>Заказ №1</h3>
-                <h5>Товар</h5>
+                <h3>Заказ №{{ el.id }}</h3>
+                <h5>{{ el.product_title }}</h5>
                   <p class="card-text">
-                    Номер клиента: 8 999 999 88 99<br>
-                    Статус заказа: не обработан<br>
-                    <button class="btn btn-sm btn-outline-primary">Обработать</button>
-                    <button class="btn btn-sm btn-outline-primary">Передать в доставку</button><br>
-                    Статус оплаты: не оплачен<br>
-                    <button class="btn btn-sm btn-outline-info">Подтвердить оплату</button></p>
+                    Номер клиента: {{ el.client_number }}<br>
+                    Имя клиента: {{ el.client_name }}<br>
+                    Статус заказа: {{ el.order_status }}<br>
+                    <form action="{{ url_for('update_order_status', order_id=el.id) }}" method="POST">
+                      <button type="submit" name="status" value="Обработан" class="btn btn-sm btn-outline-primary">Обработать</button>
+                      <button type="submit" name="status" value="Передан в доставку" class="btn btn-sm btn-outline-primary">Передать в доставку</button><br>
+                    </form>
+                    Статус оплаты: {{ el.paymen_status }}<br>
+                    <form action="{{ url_for('update_paymen_status', order_id=el.id) }}" method="post">
+                      <button type="submit" name="status" value="Оплачен" class="btn btn-sm btn-outline-info">Подтвердить оплату</button>
+                  </form>
+                  </p>
                   <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-outline-danger">Отменить</button>
-                      <button type="button" class="btn btn-sm btn-outline-success">Завершить</button>
+                      <form action="{{ url_for('update_order_status', order_id=el.id) }}" method="post">
+                        <button type="submit" name="status" value="Отменен" class="btn btn-sm btn-outline-danger">Отменить заказ</button>
+                        <button type="submit" name="status" value="Завершен" class="btn btn-sm btn-outline-success">Завершить заказ</button>
+                    </form>
                     </div>
-                    <small class="text-muted">21.12.2024 19:00</small>
                   </div>
                 </div>
               </div>
             </div>
+            {% endif %}
+            {% endfor %}
           </div>
         </div>
       </div>
+
+<h1>Завершенные заказы</h1>
+
+      <div class="album py-5 bg-light">
+          <div class="container">
+            <div class="row">
+              {% for el in data %}
+              {% if el.order_status in ["Завершен", "Отменен"] %}
+              <div class="col-md-4">
+                <div class="card mb-4 box-shadow">
+                  <div class="card-body">
+                  <h3>Заказ №{{ el.id }}</h3>
+                  <h5>{{ el.product_title }}</h5>
+                    <p class="card-text">
+                      Номер клиента: {{ el.client_number }}<br>
+                      Имя клиента: {{ el.client_name }}<br>
+                      Дата заказа: {{ el.date }}<br>
+                      Статус заказа: {{ el.order_status }}<br>
+                      <!-- <form action="{{ url_for('update_order_status', order_id=el.id) }}" method="POST">
+                        <button type="submit" name="status" value="Обработан" class="btn btn-sm btn-outline-primary">Обработать</button>
+                        <button type="submit" name="status" value="Передан в доставку" class="btn btn-sm btn-outline-primary">Передать в доставку</button><br>
+                      </form> -->
+                      Статус оплаты: {{ el.paymen_status }}<br>
+                      <!-- <form action="{{ url_for('update_paymen_status', order_id=el.id) }}" method="post">
+                        <button type="submit" name="status" value="Оплачен" class="btn btn-sm btn-outline-info">Подтвердить оплату</button>
+                    </form> -->
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="btn-group">
+                        <!-- <form action="{{ url_for('update_order_status', order_id=el.id) }}" method="post">
+                          <button type="submit" name="status" value="Отменен" class="btn btn-sm btn-outline-danger">Отменить заказ</button>
+                          <button type="submit" name="status" value="Завершен" class="btn btn-sm btn-outline-success">Завершить заказ</button>
+                      </form> -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
 {% endblock %}

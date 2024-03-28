@@ -6,12 +6,20 @@ Bob about
 
 {% block content %}
 <div class="container">
-    <h1>Добавление товара</h1>
-    <form method="post">
-        <input type="text" name="title" id="title" class="form-control" placeholder="Введите название товара"><br>
-        <input type="number" name="price" id="price" class="form-control" placeholder="Введите стоимость товара"><br>
-        <!-- <input type="checkbox" value=True name="isActive" id="isActive" class="form-check-input"><br> -->
-        <button class="btn btn-success" type="submit">Add</button>
-    </form>
+    <h1>Все товары</h1>
+    {% for el in data %}
+    <div class="card">
+        <div class="card-body">
+          {{ el.title }}
+          <div class="ml-auto">
+            <button class="btn btn-outline-warning">Кнопка</button>
+            <form action="{{ url_for('delete_record', id=el.id) }}" method="POST">
+                <button class="btn btn-outline-danger">Удалить товар</button>
+            </form>
+          </div>
+        </div>
+      </div><br>
+      {% endfor %}
+    <a href="/upload"><button class="btn btn-primary">Загрузить новый</button></a>
 </div>
 {% endblock %}

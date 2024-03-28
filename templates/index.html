@@ -13,6 +13,7 @@ Bob shop
     </div>
     <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
         {% for el in data %}
+        {% if el.isActive == True %}
         <div class="col">
             <div class="card mb-4 rounded-3 shadow-sm">
                 <div class="card-header py-3">
@@ -23,13 +24,13 @@ Bob shop
                     <ul class="list-unstyled mt-3 mb-4">
                         <li>{{ el.description }}</li>
                         <li>{{ el.category }}</li>
-                        <li>{{ el.isActive }}</li>
-                        <li><img src="../media/{{ el.image_path }}" alt="" width="200px" height="200px"></li>
+                        <li><img src="../static/media/{{ el.image_path }}" alt="" width="200px" height="200px"></li>
                     </ul>
                     <a href="/buy/{{ el.title }}"><button type="button" class="w-100 btn btn-lg btn-outline-primary">Купить</button></a>
                 </div>
             </div>
         </div>
+        {% endif %}
         {% endfor %}
     </div>
 

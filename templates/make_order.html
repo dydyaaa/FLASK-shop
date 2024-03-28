@@ -5,5 +5,14 @@ Bob make order
 {% endblock %}
 
 {% block content %}
-    <h1>id tovara: {{ title }}</h1>
+    <div class="container">
+        <div class="row">
+        <h1>{{ title }}</h1>
+        <form action="{{ url_for('buy', title=title) }}" method="POST">
+            <input placeholder="Введите номер телефона" class="form-control" type="tel" name="client_phone" id="client_phone" required><br><br>
+            <input placeholder="Введите имя" class="form-control" type="text" name="client_name" id="client_name" required><br><br>
+            <input class="btn btn-success" type="submit" value="Заказать">
+        </form>
+        </div>
+    </div>
 {% endblock %}

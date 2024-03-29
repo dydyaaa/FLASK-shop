@@ -11,6 +11,8 @@ Bob make order
         <form action="{{ url_for('buy', title=title) }}" method="POST">
             <input placeholder="Введите номер телефона" class="form-control" type="tel" name="client_phone" id="client_phone" required><br><br>
             <input placeholder="Введите имя" class="form-control" type="text" name="client_name" id="client_name" required><br><br>
+            <input class="checkbox" type="checkbox" id="agree" name="agree" required>
+            <label class="form-check-label" for="agree">Согласен с условиями обработки данных</label><br><br>
             <input class="btn btn-success" type="submit" value="Заказать">
         </form>
         </div>

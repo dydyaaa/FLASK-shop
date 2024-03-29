@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_uploads import UploadSet, IMAGES, configure_uploads
-from datetime import datetime, timezone
+from datetime import datetime
 import os
 
 
@@ -100,6 +100,17 @@ def order_accepted(order_id):
 def delete_record(id):
     record = Item.query.get_or_404(id)
     db.session.delete(record)
+    db.session.commit()
+    return redirect(url_for('create'))
+
+@app.route('/update_order/<int:order_id>', methods=['POST'])
+def update_order(order_id):
+    item = Item.query.get_or_404(order_id)
+    item.title = request.form['title']
+    item.price = request.form['price']
+    item.description = request.form['description']
+    item.category = request.form['category']
+    item.isActive = True if request.form.get('isActive') else False
     db.session.commit()
     return redirect(url_for('create'))
 

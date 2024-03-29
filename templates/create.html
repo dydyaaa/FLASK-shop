@@ -5,17 +5,78 @@ Bob about
 {% endblock %}
 
 {% block content %}
+
 <div class="container">
     <h1>Все товары</h1>
     {% for el in data %}
+
+    <div class="modal fade" id="DeleteModal{{ el.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Вы уверены?</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>
+              Вы уверены, что хотите удалить товар из базы данных? Это действие нельзя будет отменить
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+            <form action="{{ url_for('delete_record', id=el.id) }}" method="POST">
+              <button class="btn btn-outline-danger">Удалить товар</button>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="ChangeModal{{ el.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ el.title }}</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+            <form action="{{ url_for('update_order', order_id=el.id) }}" method="POST" enctype="multipart/form-data">
+        
+              <input value="{{ el.title }}" class="form-control" type="text" id="title" name="title" required><br><br>
+              
+              <input value="{{ el.price }}" class="form-control" type="number" id="price" name="price" required><br><br>
+              
+              <!-- <input class="form-control" type="file" id="image" name="image" accept="image/*" required><br><br> -->
+              
+              <textarea placeholder="{{ el.description }}" class="form-control" id="description" name="description" required></textarea><br><br>
+              
+              <input value="{{ el.category }}" class="form-control" type="text" id="category" name="category" required><br><br>
+              
+              {% if el.isActive == True %}
+              <input class="checkbox" type="checkbox" id="isActive" name="isActive" checked>
+              {% else %}
+              <input class="checkbox" type="checkbox" id="isActive" name="isActive">
+              {% endif %}
+              <label class="form-check-label" for="isActive">В наличии</label><br><br>
+              <button type="submit" class="btn btn-outline-success">Сохранить</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+              
+          </form>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
           {{ el.title }}
           <div class="ml-auto">
-            <button class="btn btn-outline-warning">Кнопка</button>
-            <form action="{{ url_for('delete_record', id=el.id) }}" method="POST">
-                <button class="btn btn-outline-danger">Удалить товар</button>
-            </form>
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#ChangeModal{{ el.id }}">
+              Изменить товар</button>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#DeleteModal{{ el.id }}">
+              Удалить товар</button>
           </div>
         </div>
       </div><br>

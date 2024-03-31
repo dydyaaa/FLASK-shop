@@ -9,7 +9,7 @@ Bob make order
         <div class="row">
         <h1>{{ title }}</h1>
         <form action="{{ url_for('buy', title=title) }}" method="POST">
-            <input placeholder="Введите номер телефона" class="form-control" type="tel" name="client_phone" id="client_phone" required><br><br>
+            <input placeholder="Введите номер телефона" class="form-control" type="tel" name="client_phone" id="client_phone" required data-phone-pattern /><br><br>
             <input placeholder="Введите имя" class="form-control" type="text" name="client_name" id="client_name" required><br><br>
             <input class="checkbox" type="checkbox" id="agree" name="agree" required>
             <label class="form-check-label" for="agree">Согласен с условиями обработки данных</label><br><br>

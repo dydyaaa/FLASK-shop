@@ -52,6 +52,9 @@ class Order(db.Model):
     def __repr__(self):
         return self.product_title
     
+    def formatted_date(self):
+        return self.date.strftime('%d-%m-%Y %H:%M')
+    
 class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
@@ -60,7 +63,7 @@ class Users(db.Model, UserMixin):
     status = db.Column(db.String, default='User', nullable=False)
 
     def __repr__(self):
-        return f'User id: {self.id}\nUser name: {self.name}'
+        return f'#{self.id}: {self.name}'
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -222,6 +225,7 @@ def register():
             try:
                 db.session.add(user)
                 db.session.commit()
+                login_user(user)
                 return redirect(url_for('profile'))
             except:
                 return 'Sosi'

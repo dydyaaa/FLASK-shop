@@ -7,13 +7,13 @@ Bob about
 {% block content %}
 <div class="container">
 <h1>Добро пожаловать, {{ current_user.name }}</h1>
-  Ваш статус {{ current_user.status }}
   {% if current_user.status == 'Admin' %}
     <p>Вы админ</p>
     <a href="{{ url_for('create') }}">Изменить товары</a><br>
-    <a href="{{ url_for('orders') }}">Просмотреть заказы</a><br><br>
+    <a href="{{ url_for('orders') }}">Просмотреть заказы</a><br>
+    {{ data }}<br><br>
   {% endif %}
 <a href="{{ url_for('logout') }}" class="btn btn-danger">Выйти</a>
-{{ data }}
+
 </div>
 {% endblock %}

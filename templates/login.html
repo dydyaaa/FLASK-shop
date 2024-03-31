@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Bob about
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<h1>Логин</h1>
+    <form action="" method="POST" enctype="multipart/form-data">
+        
+        <input placeholder="Login" class="form-control" type="text" id="name" name="name"><br><br>
+        <input placeholder="Password" class="form-control" type="password" id="password" name="password"><br>
+        <a href="" class="link-secondary link-underline-light">Забыли пароль?</a>
+        <a href="/register" class="link-secondary link-underline-light">Еще не зарегистрированы?</a><br><br>
+        <button class="btn btn-success" type="submit">Войти</button>
+    </form>
+    <p class="p-3 text-danger">{{ error }}</p>
+</div>
+{% endblock %}

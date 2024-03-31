@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_uploads import UploadSet, IMAGES, configure_uploads
+from flask_login import LoginManager, login_required, UserMixin, login_user, current_user, logout_user
 from datetime import datetime
 import os
+from werkzeug.security import generate_password_hash,  check_password_hash
 
 
 main_file_path = os.path.abspath(__file__)
@@ -12,12 +14,18 @@ database_file_path = os.path.join(directory_path, 'shop_test2.db')
 
 images = UploadSet('images', IMAGES)
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret_epta'
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{database_file_path}'
 app.config['UPLOADED_IMAGES_DEST'] = 'static/media'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 db = SQLAlchemy(app)
 configure_uploads(app, images)
 
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.query(Users).get(user_id)
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,6 +51,22 @@ class Order(db.Model):
     def __repr__(self):
         return self.product_title
     
+class Users(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False)
+    password_hash = db.Column(db.String, nullable=False)
+    status = db.Column(db.String, default='User')
+
+    def __repr__(self):
+        return f'User id: {self.id}\nUser name: {self.name}'
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
 with app.app_context():
     db.create_all()
 
@@ -58,13 +82,27 @@ def index():
 
 @app.route('/create')
 def create():
-    items = Item.query.order_by(Item.category).all()
-    return render_template('create.html', data=items)
+    if current_user.status == 'Admin':
+        items = Item.query.order_by(Item.category).all()
+        return render_template('create.html', data=items)
+    else:
+        return redirect(url_for('index'))
+
+@app.route('/profile')
+@login_required
+def profile():
+    users = Users.query.all()
+    return render_template('profile.html')
 
 @app.route('/orders')
+@login_required
 def orders():
-    orders = Order.query.order_by(Order.date).all()
-    return render_template('orders.html', data=orders)
+    if current_user.status == 'Admin':
+        orders = Order.query.order_by(Order.date).all()
+        users = Users.query.all()
+        return render_template('orders.html', data=orders, user=users)
+    else:
+        return redirect(url_for('index'))
 
 @app.route('/about')
 def about():
@@ -72,25 +110,28 @@ def about():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
-    if request.method == 'POST' and 'image' in request.files:
-        filename = images.save(request.files['image'], name=generate_filename(request.files['image'].filename))
-        is_active = True if request.form.get('isActive') else False
-        item = Item(
-            title=request.form['title'],
-            price=request.form['price'],
-            isActive=is_active,
-            image_path=filename,
-            description=request.form['description'],
-            category=request.form['category']
-        )
-        try:
-            db.session.add(item)
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'Error'
+    if current_user.status == 'Admin':
+        if request.method == 'POST' and 'image' in request.files:
+            filename = images.save(request.files['image'], name=generate_filename(request.files['image'].filename))
+            is_active = True if request.form.get('isActive') else False
+            item = Item(
+                title=request.form['title'],
+                price=request.form['price'],
+                isActive=is_active,
+                image_path=filename,
+                description=request.form['description'],
+                category=request.form['category']
+            )
+            try:
+                db.session.add(item)
+                db.session.commit()
+                return redirect('/')
+            except:
+                return 'Error'
+        else:
+            return render_template('upload.html')
     else:
-        return render_template('upload.html')
+        return redirect(url_for('index'))
     
 @app.route('/order_accepted/<int:order_id>')
 def order_accepted(order_id):
@@ -147,6 +188,39 @@ def buy(title):
             return 'Error'
     else:
         return render_template('make_order.html', title=title)
+    
+@app.route('/login/', methods=['POST', 'GET'])
+def login():
+    if request.method == 'POST':
+        name = request.form['name']
+        password = request.form['password']
+        user = Users.query.filter_by(name=name).first()
+        if user and user.check_password(password):
+            login_user(user)
+            return redirect(url_for('profile'))
+        else:
+            return 'Dolbaeb'
+    return render_template('login.html')
+
+@app.route('/register/', methods=['POST', 'GET'])
+def register():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        status = request.form['status']
+        user = Users(name=name, email=email, status=status)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('orders'))
+    return render_template('register.html')
+
+@app.route('/logout/')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Bob about
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<h1>Регистрация</h1>
+    <form action="/register" method="POST" enctype="multipart/form-data">
+        <input placeholder="Login" class="form-control" type="text" id="name" name="name"><br>
+        <input placeholder="Email" class="form-control" type="email" id="email" name="email"><br>
+        <input placeholder="Password" class="form-control" type="password" id="password" name="password"><br>
+        <input placeholder="Status" class="form-control" type="text" id="status" name="status"><br>
+        <a href="" class="link-secondary link-underline-light">Забыли пароль?</a>
+        <a href="/login" class="link-secondary link-underline-light">Уже зарегистрированы?</a><br><br>
+        <button class="btn btn-success" type="submit">Зарегестрироаться</button>
+    </form>
+    <p class="p-3 text-danger">{{ error }}</p>
+</div>
+{% endblock %}
